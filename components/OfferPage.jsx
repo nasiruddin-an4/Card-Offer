@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import {
@@ -12,62 +14,73 @@ import {
 } from "lucide-react";
 
 const OfferPage = () => {
-  const offers = [
-    {
-      id: 1,
-      title: "Health & Beauty Care",
-      description: "Wellness offers to help you look & feel your best.",
-      icon: <HeartHandshake className="w-8 h-8 text-emerald-600" />,
-      gradient: "from-rose-50 to-white",
-      border: "group-hover:border-emerald-200",
-      count: "12 Offers",
-    },
-    {
-      id: 2,
-      title: "Hotel & Resort",
-      description: "Exclusive stays and getaways for your next vacation.",
-      icon: <Hotel className="w-8 h-8 text-blue-600" />,
-      gradient: "from-rose-50 to-white",
+  const [categories, setCategories] = React.useState([]);
+  const [promotions, setPromotions] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [catRes, promoRes] = await Promise.all([
+          fetch("/api/categories"),
+          fetch("/api/promotions"),
+        ]);
+        const catData = await catRes.json();
+        const promoData = await promoRes.json();
+        setCategories(catData);
+        setPromotions(promoData);
+      } catch (err) {
+        console.error("Failed to fetch data:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const getIcon = (title) => {
+    const lowerTitle = title.toLowerCase();
+    if (lowerTitle.includes("health") || lowerTitle.includes("beauty"))
+      return <HeartHandshake className="w-8 h-8 text-emerald-600" />;
+    if (lowerTitle.includes("hotel") || lowerTitle.includes("resort"))
+      return <Hotel className="w-8 h-8 text-blue-600" />;
+    if (lowerTitle.includes("lifestyle"))
+      return <Gift className="w-8 h-8 text-rose-500" />;
+    if (lowerTitle.includes("restaurant") || lowerTitle.includes("food"))
+      return <Utensils className="w-8 h-8 text-orange-500" />;
+    if (lowerTitle.includes("travel") || lowerTitle.includes("tourism"))
+      return <Plane className="w-8 h-8 text-sky-500" />;
+    if (lowerTitle.includes("vehicle") || lowerTitle.includes("car"))
+      return <Car className="w-8 h-8 text-slate-700" />;
+    return <Sparkles className="w-8 h-8 text-[#357ebd]" />;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="bg-slate-50 py-24 px-6 md:px-12 min-h-[600px] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-100 border-t-[#357ebd] rounded-full animate-spin" />
+          <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">
+            Loading Categories...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const offers = categories.map((cat, index) => {
+    const count = promotions.filter((p) => p.category === cat.name).length;
+    return {
+      id: cat._id,
+      title: cat.name,
+      description:
+        cat.description || "Explore exclusive offers in this category.",
+      icon: getIcon(cat.name),
+      gradient: "from-white to-slate-50",
       border: "group-hover:border-blue-200",
-      count: "8 Offers",
-    },
-    {
-      id: 3,
-      title: "Lifestyle",
-      description: "Upgrade your lifestyle with premium shopping deals.",
-      icon: <Gift className="w-8 h-8 text-rose-500" />,
-      gradient: "from-rose-50 to-white",
-      border: "group-hover:border-rose-200",
-      count: "15 Offers",
-    },
-    {
-      id: 4,
-      title: "Restaurant",
-      description: "Savor the flavor with discounts at top eateries.",
-      icon: <Utensils className="w-8 h-8 text-orange-500" />,
-      gradient: "from-rose-50 to-white",
-      border: "group-hover:border-orange-200",
-      count: "24 Offers",
-    },
-    {
-      id: 5,
-      title: "Travel & Tourism",
-      description: "Fly high and explore the world for less.",
-      icon: <Plane className="w-8 h-8 text-sky-500" />,
-      gradient: "from-rose-50 to-white",
-      border: "group-hover:border-sky-200",
-      count: "5 Offers",
-    },
-    {
-      id: 6,
-      title: "Vehicle & Accessories",
-      description: "Everything for your ride, from maintenance to upgrades.",
-      icon: <Car className="w-8 h-8 text-slate-700" />,
-      gradient: "from-rose-50 to-white",
-      border: "group-hover:border-rose-200",
-      count: "9 Offers",
-    },
-  ];
+      count: `${count} ${count === 1 ? "Offer" : "Offers"}`,
+    };
+  });
 
   return (
     <div className="bg-slate-50 py-24 px-6 md:px-12">

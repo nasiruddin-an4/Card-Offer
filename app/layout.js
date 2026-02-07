@@ -1,6 +1,5 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import "./globals.css";
+import LayoutWrapper from "@/components/LayoutWrapper";
 
 export const metadata = {
   title: "Offer Card || Betopia Group",
@@ -10,10 +9,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`antialiased`} suppressHydrationWarning={true}>
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
+      <body className="antialiased" suppressHydrationWarning={true}>
+        <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>
   );

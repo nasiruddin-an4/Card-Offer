@@ -37,6 +37,11 @@ const LatestPromotions = () => {
     fetchPromotions();
   }, []);
 
+  const filteredPromotions =
+    category === "All Promotions"
+      ? promotions
+      : promotions.filter((p) => p.category === category);
+
   return (
     <div className="bg-slate-50 py-20 px-8">
       <div className="max-w-7xl mx-auto">
@@ -65,7 +70,7 @@ const LatestPromotions = () => {
 
             <div className="hidden md:block">
               <div className="px-4 py-2 bg-blue-50 text-brand-bright-orange rounded-full text-sm font-semibold border border-blue-100">
-                {promotions.length} Active Offers
+                {filteredPromotions.length} Active Offers
               </div>
             </div>
           </div>
@@ -82,20 +87,26 @@ const LatestPromotions = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-8">
-            {promotions.map((promo) => (
+            {filteredPromotions.map((promo) => (
               <div
                 onClick={() => setSelectedPromo(promo)}
                 key={promo._id}
                 className="block h-full group"
               >
                 <div className="bg-white cursor-pointer hover:shadow-xl transition-all duration-300 flex flex-col h-full rounded-sm overflow-hidden border-none shadow-sm">
-                  <div className="relative w-full h-56 overflow-hidden">
-                    <Image
-                      src={promo.image}
-                      alt={promo.title}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
+                  <div className="relative w-full h-56 overflow-hidden bg-gray-100">
+                    {promo.image && typeof promo.image === "string" ? (
+                      <Image
+                        src={promo.image}
+                        alt={promo.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Store className="text-gray-300" size={48} />
+                      </div>
+                    )}
                   </div>
                   <div className="p-5 flex flex-col grow">
                     <h3 className="font-medium text-gray-900 text-base mb-3 leading-tight">
@@ -122,7 +133,7 @@ const LatestPromotions = () => {
 
         {selectedPromo && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-8 bg-black/70 backdrop-blur-sm transition-opacity duration-300"
+            className="fixed inset-0 z-100 flex items-center justify-center p-0 md:p-8 bg-black/60 backdrop-blur-xl transition-opacity duration-300"
             onClick={() => setSelectedPromo(null)}
           >
             <div
@@ -155,13 +166,18 @@ const LatestPromotions = () => {
                 <div className="relative md:aspect-auto md:h-full p-0 md:p-0">
                   {/* Mobile Logo Showcase (Full-width brand focus) */}
                   <div className="md:hidden w-full bg-white py-4">
-                    <div className="relative w-full h-32 px-4">
-                      <Image
-                        src={selectedPromo.logo}
-                        alt="Brand Logo"
-                        fill
-                        className="object-contain"
-                      />
+                    <div className="relative w-full h-32 px-4 bg-gray-50 flex items-center justify-center">
+                      {selectedPromo.logo &&
+                      typeof selectedPromo.logo === "string" ? (
+                        <Image
+                          src={selectedPromo.logo}
+                          alt="Brand Logo"
+                          fill
+                          className="object-contain"
+                        />
+                      ) : (
+                        <Store className="text-gray-300" size={40} />
+                      )}
                     </div>
                     <div className="mt-4 px-6 text-center">
                       <h3 className="text-2xl font-bold text-gray-900 leading-tight tracking-tight">
@@ -170,27 +186,42 @@ const LatestPromotions = () => {
                     </div>
                   </div>
                   {/* Desktop Full Image */}
-                  <div className="hidden md:block absolute inset-0">
-                    <Image
-                      src={selectedPromo.image}
-                      alt={selectedPromo.title}
-                      fill
-                      className="object-cover transition-transform duration-700 hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="hidden md:block absolute inset-0 bg-gray-200">
+                    {selectedPromo.image &&
+                    typeof selectedPromo.image === "string" ? (
+                      <>
+                        <Image
+                          src={selectedPromo.image}
+                          alt={selectedPromo.title}
+                          fill
+                          className="object-cover transition-transform duration-700 hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Store className="text-gray-400" size={64} />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent" />
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Desktop Identity Overlay (Hidden Mobile) */}
                 <div className="hidden md:flex absolute top-8 left-8 items-center gap-3 z-10">
                   <div className="w-14 h-14 rounded-2xl bg-white p-1.5 shadow-xl border border-gray-100/50">
-                    <div className="relative w-full h-full rounded-xl overflow-hidden">
-                      <Image
-                        src={selectedPromo.logo}
-                        alt="Brand Logo"
-                        fill
-                        className="object-cover"
-                      />
+                    <div className="relative w-full h-full rounded-xl overflow-hidden bg-white flex items-center justify-center">
+                      {selectedPromo.logo &&
+                      typeof selectedPromo.logo === "string" ? (
+                        <Image
+                          src={selectedPromo.logo}
+                          alt="Brand Logo"
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <Store className="text-gray-300" size={24} />
+                      )}
                     </div>
                   </div>
                 </div>
