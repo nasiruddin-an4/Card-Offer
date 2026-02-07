@@ -78,7 +78,7 @@ const OfferPage = () => {
             <Sparkles size={14} />
             <span>Browse by Category</span>
           </div>
-          <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6 font-sans tracking-tight">
+          <h2 className="text-3xl md:text-5xl font-bold text-brand-bright-orange mb-6 font-sans tracking-tight">
             Discover Exclusive Deals
           </h2>
           <p className="text-slate-600 text-lg leading-relaxed">
