@@ -15,124 +15,27 @@ import {
 
 import { useSearchParams } from "next/navigation";
 
-const promotions = [
-  {
-    id: 1,
-    title: "Buy One Get One Buffet",
-    description: "Enjoy B1G1 free buffet deals with StanChart credit card",
-    image:
-      "https://images.unsplash.com/photo-1544148103-0773bf10d330?q=80&w=800&auto=format&fit=crop",
-    logo: "https://images.unsplash.com/photo-1554306274-fbf3872509b1?q=80&w=100&auto=format&fit=crop", // Placeholder logo
-    tnc: [
-      "Offer valid only for dine-in.",
-      "Prior reservation recommended.",
-      "Cannot be combined with other offers.",
-    ],
-    applicability: "Standard Chartered Credit Card Holders",
-    website: "www.example-restaurant.com",
-    hotline: "+880 1234 567890",
-    partner: "Platter Restaurant",
-    location: "Banani, Dhaka 1213",
-  },
-  {
-    id: 2,
-    title: "Pedal your way with a brand new ride.",
-    description:
-      "Avail 0% InstaBuys on new bicycles from CycleLife Exclusive and Duranta Bicycle.",
-    image:
-      "https://images.unsplash.com/photo-1485965120184-e220f721d03e?q=80&w=800&auto=format&fit=crop",
-    logo: "https://images.unsplash.com/photo-1623519967208-a53272e5057b?q=80&w=100&auto=format&fit=crop",
-    tnc: [
-      "Minimum purchase value 10,000 BDT.",
-      "0% interest for up to 6 months.",
-    ],
-    applicability: "All Credit Card Holders",
-    website: "www.cyclelife.com",
-    hotline: "+880 1711 223344",
-    partner: "CycleLife Exclusive",
-    location: "Tejgaon, Dhaka 1208",
-  },
-  {
-    id: 3,
-    title: "Dazzle everyone around you.",
-    description:
-      "Buy your desired jewellery from top brands and pay in up to 24 equal monthly instalments at 0% interest.",
-    image:
-      "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=800&auto=format&fit=crop",
-    logo: "https://images.unsplash.com/photo-1616618147690-e5bea43c8f37?q=80&w=100&auto=format&fit=crop",
-    tnc: ["Valid on diamond jewellery only.", "Processing fee may apply."],
-    applicability: "Prime Bank Credit Cards",
-    website: "www.sparkle-gems.com",
-    hotline: "+880 1999 888777",
-    partner: "Sparkle Gems",
-    location: "Gulshan-1, Dhaka 1212",
-  },
-  {
-    id: 4,
-    title: "Give your home a fresh makeover.",
-    description:
-      "Decorate your home with trendy furniture items. Buy from renowned brands and pay in up to 24 months equal monthly instalments.",
-    image:
-      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=800&auto=format&fit=crop",
-    logo: "https://images.unsplash.com/photo-1616486338812-3dadae4b4f9d?q=80&w=100&auto=format&fit=crop",
-    tnc: ["Delivery charges applicable.", "Installation included."],
-    applicability: "Dutch-Bangla Bank Cards",
-    website: "www.home-decor.com",
-    hotline: "+880 1555 666777",
-    partner: "Home Decor Ltd.",
-    location: "Uttara, Dhaka 1230",
-  },
-  {
-    id: 5,
-    title: "Buy from the comfort of your home.",
-    description:
-      "Purchase brand new electronics & home appliances online and pay in up to 24 months equal monthly instalments at 0% interest.",
-    image:
-      "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=800&auto=format&fit=crop",
-    logo: "https://images.unsplash.com/photo-1594412258909-3286dc757341?q=80&w=100&auto=format&fit=crop",
-    tnc: ["Manufacturer warranty applies.", "No returns on opened items."],
-    applicability: "City Bank American Express",
-    website: "www.tech-shop.com.bd",
-    hotline: "+880 1888 999000",
-    partner: "TechShop BD",
-    location: "Elephant Road, Dhaka 1205",
-  },
-  {
-    id: 6,
-    title: "Transform your closet",
-    description:
-      "Shop the latest fashion trends and upgrade your wardrobe with exclusive discounts.",
-    image:
-      "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=800&auto=format&fit=crop",
-    logo: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=100&auto=format&fit=crop",
-    tnc: ["Discount on selected items only.", "VAT excluded."],
-    applicability: "BRAC Bank Card Holders",
-    website: "www.fashion-hub.com",
-    hotline: "+880 1666 555444",
-    partner: "Fashion Hub",
-    location: "Jamuna Future Park, Dhaka 1229",
-  },
-  {
-    id: 7,
-    title: "Let every flavor tell a story",
-    description:
-      "Experience culinary delights at top-rated restaurants with special offers.",
-    image:
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800&auto=format&fit=crop",
-    logo: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=100&auto=format&fit=crop",
-    tnc: ["Valid for dinner only.", "Max discount 2000 BDT."],
-    applicability: "EBL Visa & Mastercard",
-    website: "www.foodie-paradise.com",
-    hotline: "+880 1333 444555",
-    partner: "Foodie Paradise",
-    location: "Dhanmondi, Dhaka 1209",
-  },
-];
-
 const LatestPromotions = () => {
+  const [promotions, setPromotions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedPromo, setSelectedPromo] = useState(null);
   const searchParams = useSearchParams();
   const category = searchParams.get("category") || "All Promotions";
+
+  React.useEffect(() => {
+    const fetchPromotions = async () => {
+      try {
+        const res = await fetch("/api/promotions");
+        const data = await res.json();
+        setPromotions(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Failed to fetch promotions:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPromotions();
+  }, []);
 
   return (
     <div className="bg-slate-50 py-20 px-8">
@@ -168,43 +71,54 @@ const LatestPromotions = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-8">
-          {promotions.map((promo) => (
-            <div
-              onClick={() => setSelectedPromo(promo)}
-              key={promo.id}
-              className="block h-full group"
-            >
-              <div className="bg-white cursor-pointer hover:shadow-xl transition-all duration-300 flex flex-col h-full rounded-sm overflow-hidden border-none shadow-sm">
-                <div className="relative w-full h-56 overflow-hidden">
-                  <Image
-                    src={promo.image}
-                    alt={promo.title}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-5 flex flex-col grow">
-                  <h3 className="font-medium text-gray-900 text-base mb-3 leading-tight">
-                    {promo.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 leading-relaxed line-clamp-4 mb-4">
-                    {promo.description}
-                  </p>
-
-                  {/* Simple More Button */}
-                  <div className="mt-auto pt-2 flex items-center text-gray-400 group-hover:text-gray-600 transition-all duration-300 text-sm font-normal opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0">
-                    More
-                    <ArrowRight
-                      size={14}
-                      className="ml-1 transition-transform group-hover:translate-x-1"
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[1, 2, 3, 4].map((n) => (
+              <div
+                key={n}
+                className="bg-white rounded-sm h-[400px] animate-pulse border border-gray-100"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-8">
+            {promotions.map((promo) => (
+              <div
+                onClick={() => setSelectedPromo(promo)}
+                key={promo._id}
+                className="block h-full group"
+              >
+                <div className="bg-white cursor-pointer hover:shadow-xl transition-all duration-300 flex flex-col h-full rounded-sm overflow-hidden border-none shadow-sm">
+                  <div className="relative w-full h-56 overflow-hidden">
+                    <Image
+                      src={promo.image}
+                      alt={promo.title}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
+                  </div>
+                  <div className="p-5 flex flex-col grow">
+                    <h3 className="font-medium text-gray-900 text-base mb-3 leading-tight">
+                      {promo.title}
+                    </h3>
+                    <p className="text-sm text-gray-500 leading-relaxed line-clamp-4 mb-4">
+                      {promo.description}
+                    </p>
+
+                    {/* Simple More Button */}
+                    <div className="mt-auto pt-2 flex items-center text-gray-400 group-hover:text-gray-600 transition-all duration-300 text-sm font-normal opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0">
+                      More
+                      <ArrowRight
+                        size={14}
+                        className="ml-1 transition-transform group-hover:translate-x-1"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {selectedPromo && (
           <div
@@ -263,7 +177,7 @@ const LatestPromotions = () => {
                       fill
                       className="object-cover transition-transform duration-700 hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
                   </div>
                 </div>
 
