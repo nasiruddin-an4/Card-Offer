@@ -3,6 +3,8 @@ import clientPromise from "@/lib/mongodb";
 
 const DB_NAME = process.env.MONGODB_DB;
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const client = await clientPromise;

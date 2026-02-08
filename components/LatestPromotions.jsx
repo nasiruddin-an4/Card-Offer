@@ -25,7 +25,7 @@ const LatestPromotions = () => {
   React.useEffect(() => {
     const fetchPromotions = async () => {
       try {
-        const res = await fetch("/api/promotions");
+        const res = await fetch("/api/promotions", { cache: "no-store" });
         const data = await res.json();
         setPromotions(Array.isArray(data) ? data : []);
       } catch (err) {

@@ -19,19 +19,37 @@ export async function POST(request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Upload to Cloudinary
+    // STRICTLY ENFORCE IMAGE TYPES
+    // The user requested: "only image not pdf.. only all type image"
+    if (!file.type.startsWith("image/")) {
+      console.error(`Rejected non-image file: ${file.name} (${file.type})`);
+      return NextResponse.json(
+        {
+          error:
+            "Only image files are allowed (JPG, PNG, WEBP, etc). PDF is not accepted.",
+        },
+        { status: 400 },
+      );
+    }
+
+    console.log(`Uploading valid image: ${file.name} (${file.type})`);
+
+    // Upload to Cloudinary with explicit 'image' resource type
     return new Promise((resolve) => {
       cloudinary.uploader
-        .upload_stream({ folder: "betopia_promotions" }, (error, result) => {
-          if (error) {
-            console.error("Cloudinary Error:", error);
-            resolve(
-              NextResponse.json({ error: "Upload failed" }, { status: 500 }),
-            );
-          } else {
-            resolve(NextResponse.json({ url: result.secure_url }));
-          }
-        })
+        .upload_stream(
+          { folder: "betopia_promotions", resource_type: "auto" },
+          (error, result) => {
+            if (error) {
+              console.error("Cloudinary Error:", error);
+              resolve(
+                NextResponse.json({ error: "Upload failed" }, { status: 500 }),
+              );
+            } else {
+              resolve(NextResponse.json({ url: result.secure_url }));
+            }
+          },
+        )
         .end(buffer);
     });
   } catch (error) {

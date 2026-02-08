@@ -12,15 +12,23 @@ import {
   Save,
   Grid,
   Filter,
+  Image as ImageIcon,
+  Upload,
 } from "lucide-react";
 import Swal from "sweetalert2";
+import Image from "next/image";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
-  const [formData, setFormData] = useState({ name: "", description: "" });
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    image: "",
+  });
+  const [previews, setPreviews] = useState({ image: null });
   const [isSaving, setIsSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -46,12 +54,60 @@ export default function CategoriesPage() {
       setFormData({
         name: category.name,
         description: category.description || "",
+        image: category.image || "",
+      });
+      setPreviews({
+        image: category.image || null,
       });
     } else {
       setEditingCategory(null);
-      setFormData({ name: "", description: "" });
+      setFormData({ name: "", description: "", image: "" });
+      setPreviews({ image: null });
     }
     setIsModalOpen(true);
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Show local preview immediately
+    setPreviews({ image: URL.createObjectURL(file) });
+
+    const uploadData = new FormData();
+    uploadData.append("file", file);
+
+    try {
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: uploadData,
+      });
+
+      if (!res.ok) {
+        throw new Error("Upload response not OK");
+      }
+
+      const data = await res.json();
+      if (data.url) {
+        setFormData((prev) => ({ ...prev, image: data.url }));
+      } else {
+        throw new Error("No URL returned from upload");
+      }
+    } catch (err) {
+      console.error("Upload failed", err);
+      // Revert preview on failure
+      setPreviews((prev) => ({
+        ...prev,
+        image: editingCategory?.image || null,
+      }));
+
+      Swal.fire({
+        title: "Upload Failed",
+        text: "Could not upload image. Please try again or check file type.",
+        icon: "error",
+        confirmButtonColor: "#357ebd",
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -212,8 +268,17 @@ export default function CategoriesPage() {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-br from-blue-50/50 to-transparent rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700 ease-out" />
 
                 <div className="relative flex-1">
-                  <div className="w-12 h-12 bg-blue-50 text-[#357ebd] rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                    <Tag size={22} />
+                  <div className="w-12 h-12 bg-blue-50 text-[#357ebd] rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-sm overflow-hidden relative">
+                    {category.image ? (
+                      <Image
+                        src={category.image}
+                        alt={category.name}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <Tag size={22} />
+                    )}
                   </div>
 
                   <h3 className="text-lg font-bold text-slate-900 mb-2 truncate pr-4">
@@ -306,6 +371,65 @@ export default function CategoriesPage() {
                       className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-50 focus:border-[#357ebd] focus:bg-white transition-all font-semibold text-slate-900 placeholder:text-slate-400"
                       placeholder="e.g. Wellness & Spa"
                     />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">
+                    Cover Image
+                  </label>
+
+                  <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 hover:border-[#357ebd] transition-all group relative overflow-hidden">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        handleFileUpload(e);
+                        e.target.value = "";
+                      }}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+
+                    {previews.image ? (
+                      <div className="relative w-full h-48 rounded-lg overflow-hidden group/preview">
+                        <Image
+                          src={previews.image}
+                          alt="Preview"
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity z-20 pointer-events-none">
+                          <span className="text-white font-bold text-sm flex items-center gap-2 mb-3">
+                            <Upload size={16} /> Change Image
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setFormData({ ...formData, image: "" });
+                            setPreviews({ ...previews, image: null });
+                          }}
+                          className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all z-30 opacity-0 group-hover/preview:opacity-100 shadow-md pointer-events-auto"
+                          title="Remove Image"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="py-8">
+                        <div className="w-16 h-16 bg-blue-50 text-[#357ebd] rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                          <ImageIcon size={28} />
+                        </div>
+                        <h4 className="text-slate-900 font-bold mb-1">
+                          Click to Upload
+                        </h4>
+                        <p className="text-xs text-slate-400">
+                          JPG, PNG, WEBP or GIF (max. 5MB)
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 

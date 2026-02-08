@@ -167,14 +167,25 @@ export default function PromotionsListPage() {
         method: "POST",
         body: uploadData,
       });
+
+      if (!res.ok) {
+        throw new Error("Upload response not OK");
+      }
+
       const data = await res.json();
       if (data.url) {
         setFormData((prev) => ({ ...prev, [type]: data.url }));
+      } else {
+        throw new Error("No URL returned");
       }
     } catch (err) {
+      console.error("Upload failed", err);
+      // Revert preview
+      setPreviews((prev) => ({ ...prev, [type]: formData[type] || null }));
+
       Swal.fire({
         title: "Upload Failed",
-        text: "Please try again later.",
+        text: "Could not upload image. Please try again or check file type.",
         icon: "error",
         confirmButtonColor: "#357ebd",
       });
@@ -767,19 +778,33 @@ export default function PromotionsListPage() {
                                 fill
                                 className="object-cover"
                               />
-                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <label className="p-3 bg-white/20 backdrop-blur rounded-xl cursor-pointer hover:bg-white/30 transition-all">
+                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center z-10 pointer-events-none">
+                                <label className="p-3 bg-white/20 backdrop-blur rounded-xl cursor-pointer hover:bg-white/30 transition-all pointer-events-auto">
                                   <Upload size={20} />
                                   <input
                                     type="file"
                                     className="hidden"
-                                    onChange={(e) =>
-                                      handleFileUpload(e, "image")
-                                    }
+                                    onChange={(e) => {
+                                      handleFileUpload(e, "image");
+                                      e.target.value = "";
+                                    }}
                                     accept="image/*"
                                   />
                                 </label>
                               </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setFormData({ ...formData, image: "" });
+                                  setPreviews({ ...previews, image: null });
+                                }}
+                                className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all z-20 opacity-0 group-hover:opacity-100 shadow-md cursor-pointer"
+                                title="Remove Image"
+                              >
+                                <X size={14} />
+                              </button>
                             </>
                           ) : (
                             <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
@@ -793,7 +818,10 @@ export default function PromotionsListPage() {
                               <input
                                 type="file"
                                 className="hidden"
-                                onChange={(e) => handleFileUpload(e, "image")}
+                                onChange={(e) => {
+                                  handleFileUpload(e, "image");
+                                  e.target.value = "";
+                                }}
                                 accept="image/*"
                               />
                             </label>
@@ -822,19 +850,33 @@ export default function PromotionsListPage() {
                                 fill
                                 className="object-contain p-4"
                               />
-                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <label className="p-3 bg-white/20 backdrop-blur rounded-full cursor-pointer hover:bg-white/30 transition-all">
+                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center z-10 pointer-events-none">
+                                <label className="p-3 bg-white/20 backdrop-blur rounded-full cursor-pointer hover:bg-white/30 transition-all pointer-events-auto">
                                   <Upload size={20} />
                                   <input
                                     type="file"
                                     className="hidden"
-                                    onChange={(e) =>
-                                      handleFileUpload(e, "logo")
-                                    }
+                                    onChange={(e) => {
+                                      handleFileUpload(e, "logo");
+                                      e.target.value = "";
+                                    }}
                                     accept="image/*"
                                   />
                                 </label>
                               </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setFormData({ ...formData, logo: "" });
+                                  setPreviews({ ...previews, logo: null });
+                                }}
+                                className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all z-20 opacity-0 group-hover:opacity-100 shadow-md cursor-pointer"
+                                title="Remove Logo"
+                              >
+                                <X size={14} />
+                              </button>
                             </>
                           ) : (
                             <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
@@ -848,7 +890,10 @@ export default function PromotionsListPage() {
                               <input
                                 type="file"
                                 className="hidden"
-                                onChange={(e) => handleFileUpload(e, "logo")}
+                                onChange={(e) => {
+                                  handleFileUpload(e, "logo");
+                                  e.target.value = "";
+                                }}
                                 accept="image/*"
                               />
                             </label>
