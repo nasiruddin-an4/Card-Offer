@@ -41,12 +41,39 @@ const OfferPage = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-slate-50 py-24 px-6 md:px-12 min-h-[600px] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-blue-100 border-t-[#357ebd] rounded-full animate-spin" />
-          <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">
-            Loading Categories...
-          </p>
+      <div className="bg-slate-50 py-24 px-6 md:px-12">
+        <div className="max-w-7xl mx-auto">
+          {/* Header Skeleton / Static Header for stability */}
+          <div className="text-center max-w-2xl mx-auto mb-16 animate-pulse">
+            <div className="h-8 w-48 bg-slate-200 rounded-full mx-auto mb-6" />
+            <div className="h-12 w-3/4 bg-slate-200 rounded-lg mx-auto mb-4" />
+            <div className="h-4 w-5/6 bg-slate-200 rounded-lg mx-auto" />
+          </div>
+
+          {/* Skeleton Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="h-full bg-white rounded-md border border-slate-100 overflow-hidden flex flex-col"
+              >
+                {/* Image Skeleton */}
+                <div className="relative h-48 w-full bg-slate-200 animate-pulse" />
+
+                {/* Content Skeleton */}
+                <div className="p-6 flex-1 space-y-4">
+                  <div className="h-6 w-3/4 bg-slate-200 rounded animate-pulse" />
+                  <div className="space-y-2">
+                    <div className="h-4 w-full bg-slate-200 rounded animate-pulse" />
+                    <div className="h-4 w-5/6 bg-slate-200 rounded animate-pulse" />
+                  </div>
+                  <div className="pt-4 mt-auto border-t border-slate-50 flex items-center gap-2">
+                    <div className="h-4 w-24 bg-slate-200 rounded animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
